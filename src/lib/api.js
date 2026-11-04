@@ -83,6 +83,15 @@ const real = {
     if (error) throw error
     await supabase.storage.from('musicas').remove([song.path])
   },
+  // Zera a equipe inteira. O banco apaga os registros e devolve os arquivos para remover do armazenamento.
+  async resetTeam(teamId) {
+    const { data, error } = await supabase.rpc('reset_team', { p_team_id: teamId })
+    if (error) throw new Error('Não foi possível restaurar a equipe. ' + error.message)
+    for (const bucket of ['musicas', 'arquivos']) {
+      const paths = (data || []).filter((r) => r.bucket === bucket).map((r) => r.path)
+      if (paths.length) await supabase.storage.from(bucket).remove(paths)
+    }
+  },
   // Campos de texto simples da equipe (responsáveis).
   async setTeamField(teamId, field, value) {
     if (!OWNER_FIELDS[field]) throw new Error('Campo inválido.')
@@ -221,6 +230,18 @@ const demo = {
     URL.revokeObjectURL(song.url)
     demoSongs = demoSongs.filter((s) => s.id !== song.id)
     const db = load(); demoLog(db, song.team_id, `Removeu a música "${song.title}"`); save(db); notify('songs')
+  },
+  async resetTeam(teamId) {
+    const db = load()
+    const team = db.teams.find((t) => t.id === teamId)
+    Object.assign(team, { color: null, notes: '', flag_owner: '', music_owner: '' })
+    team.members.forEach((m) => { m.name = '' })
+    const nSongs = demoSongs.filter((x) => x.team_id === teamId).length
+    const nFiles = demoFiles.filter((x) => x.team_id === teamId).length
+    demoSongs = demoSongs.filter((x) => x.team_id !== teamId)
+    demoFiles = demoFiles.filter((x) => x.team_id !== teamId)
+    demoLog(db, teamId, `Restaurou a equipe ao zero (${nSongs} música(s) e ${nFiles} arquivo(s) apagados)`)
+    save(db); notify('teams')
   },
   async setTeamField(teamId, field, value) {
     if (!OWNER_FIELDS[field]) throw new Error('Campo inválido.')
