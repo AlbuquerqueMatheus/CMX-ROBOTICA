@@ -23,9 +23,9 @@ export default function Login() {
   return (
     <div className="center">
       <form className="card login" onSubmit={submit}>
-        <div className="logo big">🤖</div>
+        <span className="logo-badge big"><img src="/logo-cmx.png" alt="Colégio CMX Moreira Xavier" /></span>
         <h1>Campeonato de Robótica</h1>
-        <p className="muted">Colégio CMX · acesso dos professores e da coordenação</p>
+        <p className="muted">Colégio CMX Moreira Xavier · acesso dos professores e da coordenação</p>
         <label>
           E-mail
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
