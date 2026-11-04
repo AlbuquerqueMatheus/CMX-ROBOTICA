@@ -3,7 +3,7 @@ import { api } from '../lib/api'
 
 const titleFromFile = (name) => name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim()
 
-export default function Songs({ teamId, version }) {
+export default function Songs({ teamId, version, children }) {
   const [songs, setSongs] = useState([])
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
@@ -54,6 +54,7 @@ export default function Songs({ teamId, version }) {
         </button>
         <input ref={input} type="file" accept="audio/*" multiple hidden onChange={(e) => upload([...e.target.files])} />
       </div>
+      {children}
       {error && <div className="error">{error}</div>}
       {busy && <p className="muted">{busy}</p>}
       {songs.length === 0 && !busy ? (

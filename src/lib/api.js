@@ -1,7 +1,7 @@
 // Camada de dados. Usa o Supabase quando as variáveis de ambiente existem;
 // sem elas, roda em "modo demonstração" salvando só neste navegador.
 import { createClient } from '@supabase/supabase-js'
-import { ROLES, TEAM_NAMES } from './constants'
+import { OWNER_FIELDS, ROLES, TEAM_NAMES } from './constants'
 
 const url = import.meta.env.VITE_SUPABASE_URL
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -32,7 +32,7 @@ const real = {
   async listTeams() {
     const { data, error } = await supabase
       .from('teams')
-      .select('id, name, color, notes, members(id, role, name)')
+      .select('id, name, color, notes, flag_owner, music_owner, members(id, role, name)')
     if (error) throw error
     return sortTeams(data)
   },
@@ -78,6 +78,12 @@ const real = {
     const { error } = await supabase.from('songs').delete().eq('id', song.id)
     if (error) throw error
     await supabase.storage.from('musicas').remove([song.path])
+  },
+  // Campos de texto simples da equipe (responsáveis).
+  async setTeamField(teamId, field, value) {
+    if (!OWNER_FIELDS[field]) throw new Error('Campo inválido.')
+    const { error } = await supabase.from('teams').update({ [field]: value }).eq('id', teamId)
+    if (error) throw error
   },
   async setNotes(teamId, notes) {
     const { error } = await supabase.from('teams').update({ notes }).eq('id', teamId)
@@ -211,6 +217,18 @@ const demo = {
     URL.revokeObjectURL(song.url)
     demoSongs = demoSongs.filter((s) => s.id !== song.id)
     const db = load(); demoLog(db, song.team_id, `Removeu a música "${song.title}"`); save(db); notify('songs')
+  },
+  async setTeamField(teamId, field, value) {
+    if (!OWNER_FIELDS[field]) throw new Error('Campo inválido.')
+    const db = load()
+    const team = db.teams.find((t) => t.id === teamId)
+    const old = team[field] || ''
+    if (old === value) return
+    team[field] = value
+    const label = OWNER_FIELDS[field]
+    demoLog(db, teamId, !value ? `${label}: removeu "${old}"` : !old ? `${label}: definiu "${value}"`
+      : `${label}: trocou "${old}" por "${value}"`)
+    save(db); notify('teams')
   },
   async setNotes(teamId, notes) {
     const db = load()

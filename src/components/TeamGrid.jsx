@@ -27,6 +27,10 @@ export default function TeamGrid({ teams, onOpen }) {
                   )
                 })}
               </ul>
+              <div className="owners small">
+                <div><span className="muted">🚩 Bandeira:</span> {t.flag_owner || <em className="muted">a definir</em>}</div>
+                <div><span className="muted">🎵 Música:</span> {t.music_owner || <em className="muted">a definir</em>}</div>
+              </div>
               <div className="small muted">{filled}/4 integrantes</div>
             </button>
           )

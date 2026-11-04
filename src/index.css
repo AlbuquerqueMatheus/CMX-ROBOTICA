@@ -76,3 +76,7 @@ select { font: inherit; padding: 8px 10px; border: 1px solid var(--border); bord
 .history li { padding: 12px 0; border-bottom: 1px solid var(--border); display: grid; gap: 3px; }
 .history li:last-child { border-bottom: 0; }
 .tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); margin-right: 4px; }
+.owner { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); display: grid; gap: 6px; }
+.owner-row { display: flex; gap: 8px; max-width: 520px; }
+.owners { display: grid; gap: 2px; padding-top: 6px; border-top: 1px dashed var(--border); }
+.card .owner:first-of-type:is(.section-head + *) { margin-top: 0; padding-top: 0; border-top: 0; margin-bottom: 16px; }
