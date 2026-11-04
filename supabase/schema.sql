@@ -47,3 +47,31 @@ select t.id, r.role
 from public.teams t
 cross join (values ('lider'),('organizador'),('programador'),('construtor')) as r(role)
 on conflict (team_id, role) do nothing;
+
+-- ============ Passo 2: músicas ============
+create table if not exists public.songs (
+  id uuid primary key default gen_random_uuid(),
+  team_id uuid not null references public.teams(id) on delete cascade,
+  title text not null,
+  path text not null unique,
+  created_at timestamptz not null default now()
+);
+alter table public.songs enable row level security;
+drop policy if exists "logados gerenciam musicas" on public.songs;
+create policy "logados gerenciam musicas" on public.songs
+  for all to authenticated using (true) with check (true);
+
+-- Bucket privado para os arquivos de áudio (até 50 MB cada).
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('musicas', 'musicas', false, 52428800, array['audio/*'])
+on conflict (id) do nothing;
+
+drop policy if exists "logados leem musicas" on storage.objects;
+create policy "logados leem musicas" on storage.objects
+  for select to authenticated using (bucket_id = 'musicas');
+drop policy if exists "logados enviam musicas" on storage.objects;
+create policy "logados enviam musicas" on storage.objects
+  for insert to authenticated with check (bucket_id = 'musicas');
+drop policy if exists "logados apagam musicas" on storage.objects;
+create policy "logados apagam musicas" on storage.objects
+  for delete to authenticated using (bucket_id = 'musicas');
