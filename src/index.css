@@ -1,9 +1,9 @@
 :root {
   /* Paleta do Colégio CMX (verde da logo) em modo escuro */
-  --bg: #0d1411; --card: #151f1a; --border: #263a2f; --text: #e8f0ea; --muted: #94a89b;
+  --bg: #1c2822; --card: #26352d; --border: #3d5446; --text: #eef4ef; --muted: #a6b8ac;
   --accent: #1f8a3c; --accent-hover: #28a048; --accent-text: #ffffff; --accent-soft: #28a04826;
   --brand: #28a048; --brand-light: #60b040;
-  --error: #fca5a5; --error-bg: #3b1d1d; --banner: #2c3a16;
+  --error: #fca5a5; --error-bg: #4a2323; --banner: #3d4d20; --ring: rgba(255, 255, 255, 0.6);
   color-scheme: dark;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--text); background: var(--bg);
@@ -32,12 +32,12 @@ h1, h2, h3 { margin: 0 0 12px; }
 .user { display: flex; gap: 12px; align-items: center; font-size: 14px; }
 .content { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
-.team { text-align: left; border-top: 6px solid; display: flex; flex-direction: column; gap: 8px; transition: transform .1s; }
+.team { text-align: left; overflow: hidden; display: flex; flex-direction: column; gap: 8px; transition: transform .1s; }
 .team:hover { transform: translateY(-2px); }
 .team-head { display: flex; justify-content: space-between; align-items: center; }
 .team-name { font-size: 26px; font-weight: 800; }
 .mini { list-style: none; padding: 0; margin: 4px 0; font-size: 14px; display: grid; gap: 3px; }
-.dot { display: inline-block; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; }
+.dot { display: inline-block; border-radius: 50%; border: 2px solid var(--ring); flex-shrink: 0; }
 .detail { display: flex; flex-direction: column; gap: 16px; }
 .detail h2 { margin: 0; }
 .detail > .link { align-self: flex-start; }
@@ -88,3 +88,8 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--brand); out
 .team:hover { border-color: var(--brand); }
 h2 { color: var(--text); }
 @media (max-width: 640px) { .brand-title { display: none; } }
+
+/* Faixa com a cor da equipe no topo do card, com contorno claro para cores escuras (preta, marrom). */
+.team-stripe { height: 10px; margin: -20px -20px 6px; border-bottom: 1px solid var(--ring); }
+.team-stripe.none { background: var(--border); border-bottom-color: transparent; }
+.color-chip { display: inline-flex; align-items: center; gap: 6px; }

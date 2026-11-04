@@ -10,8 +10,8 @@ export default function TeamGrid({ teams, onOpen }) {
           const filled = t.members.filter((m) => m.name.trim()).length
           const c = colorById(t.color)
           return (
-            <button key={t.id} className="card team" onClick={() => onOpen(t.id)}
-              style={{ borderTopColor: c ? c.hex : 'var(--border)' }}>
+            <button key={t.id} className="card team" onClick={() => onOpen(t.id)}>
+              <div className={'team-stripe' + (c ? '' : ' none')} style={c ? { background: c.hex } : undefined} />
               <div className="team-head">
                 <span className="team-name">{t.name}</span>
                 <ColorDot color={t.color} />
