@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../lib/api'
-import { COLORS, ROLES } from '../lib/constants'
+import { COLORS, ROLES, colorById } from '../lib/constants'
 import Songs from './Songs'
 import Files from './Files'
 import Notes from './Notes'
 import History from './History'
+import OwnerField from './OwnerField'
 
 export default function TeamDetail({ team, teams, version, onBack, onChange }) {
   const initial = () => Object.fromEntries(ROLES.map((r) => [r.id, team.members.find((m) => m.role === r.id)?.name || '']))
@@ -79,6 +80,8 @@ export default function TeamDetail({ team, teams, version, onBack, onChange }) {
           })}
         </div>
         <p className="small muted">Cada cor pode ser usada por uma equipe. Clique na cor escolhida de novo para liberar.</p>
+        <OwnerField team={team} field="flag_owner" onChange={onChange}
+          hint={colorById(team.color) ? `Bandeira ${colorById(team.color).label.toLowerCase()}` : 'Escolha a cor da equipe para definir a bandeira'} />
       </section>
 
       <section className="card">
@@ -98,7 +101,9 @@ export default function TeamDetail({ team, teams, version, onBack, onChange }) {
         </form>
       </section>
 
-      <Songs teamId={team.id} version={version} />
+      <Songs teamId={team.id} version={version}>
+        <OwnerField team={team} field="music_owner" onChange={onChange} />
+      </Songs>
 
       <Files teamId={team.id} version={version} />
 
