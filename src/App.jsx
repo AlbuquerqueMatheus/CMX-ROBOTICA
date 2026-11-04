@@ -55,7 +55,8 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <button className="brand" onClick={() => go('equipes')}>
-          <span className="logo">🤖</span> Campeonato de Robótica CMX
+          <span className="logo-badge"><img src="/logo-cmx.png" alt="Colégio CMX Moreira Xavier" /></span>
+          <span className="brand-title">Campeonato de Robótica</span>
         </button>
         <nav className="nav">
           <button className={page === 'equipes' ? 'on' : ''} onClick={() => go('equipes')}>Equipes</button>

@@ -1,15 +1,12 @@
 :root {
-  --bg: #f4f6fb; --card: #ffffff; --text: #1b2033; --muted: #6b7280;
-  --border: #dde2ec; --accent: #2554d9; --accent-text: #fff; --error: #b91c1c; --error-bg: #fde8e8;
-  --banner: #fff7d6;
+  /* Paleta do Colégio CMX (verde da logo) em modo escuro */
+  --bg: #0d1411; --card: #151f1a; --border: #263a2f; --text: #e8f0ea; --muted: #94a89b;
+  --accent: #1f8a3c; --accent-hover: #28a048; --accent-text: #ffffff; --accent-soft: #28a04826;
+  --brand: #28a048; --brand-light: #60b040;
+  --error: #fca5a5; --error-bg: #3b1d1d; --banner: #2c3a16;
+  color-scheme: dark;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--text); background: var(--bg);
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #11141c; --card: #1a1f2b; --text: #e8ebf3; --muted: #9aa3b5;
-    --border: #2c3344; --accent: #5b82f0; --error: #fca5a5; --error-bg: #3b1d1d; --banner: #3a3216;
-  }
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); }
@@ -25,11 +22,12 @@ h1, h2, h3 { margin: 0 0 12px; }
 .login { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 14px; text-align: center; }
 .login label { text-align: left; }
 .logo.big { font-size: 44px; }
+.primary:not(:disabled):hover { background: var(--accent-hover); }
 .primary { background: var(--accent); color: var(--accent-text); border: 0; border-radius: 8px; padding: 11px 18px; font-weight: 600; }
-.link { background: none; border: 0; color: var(--accent); padding: 0; }
+.link { background: none; border: 0; color: var(--brand-light); padding: 0; }
 .error { background: var(--error-bg); color: var(--error); padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; }
 .banner { background: var(--banner); padding: 8px 16px; font-size: 14px; text-align: center; }
-.topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.topbar { border-bottom: 3px solid var(--brand) !important; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
 .brand { background: none; border: 0; font-weight: 700; font-size: 17px; display: flex; gap: 8px; align-items: center; padding: 0; }
 .user { display: flex; gap: 12px; align-items: center; font-size: 14px; }
 .content { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
@@ -45,14 +43,14 @@ h1, h2, h3 { margin: 0 0 12px; }
 .detail > .link { align-self: flex-start; }
 .colors { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
 .swatch { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg); }
-.swatch.active { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+.swatch.active { border-color: var(--brand); box-shadow: 0 0 0 3px var(--accent-soft); }
 .members { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
 .row { display: flex; gap: 12px; align-items: center; grid-column: 1 / -1; }
 .section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
 .section-head h3 { margin: 0; }
 .songs { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
 .songs li { display: grid; grid-template-columns: 1fr minmax(220px, 340px) auto; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; }
-.songs li.now { border-color: var(--accent); }
+.songs li.now { border-color: var(--brand); background: var(--accent-soft); }
 .songs audio { width: 100%; height: 36px; }
 .song-title { font-weight: 600; overflow-wrap: anywhere; }
 .danger { color: var(--error); }
@@ -69,7 +67,7 @@ a.link { text-decoration: none; }
 @media (max-width: 640px) { .files li { grid-template-columns: 48px 1fr auto; } .files li a.link { display: none; } }
 .nav { display: flex; gap: 4px; }
 .nav button { background: none; border: 0; padding: 6px 12px; border-radius: 8px; color: var(--muted); font-weight: 600; }
-.nav button.on { background: var(--bg); color: var(--text); }
+.nav button.on { background: var(--accent-soft); color: var(--brand-light); }
 select { font: inherit; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); }
 .history { list-style: none; margin: 0; padding: 0; display: grid; }
 .history.card { padding: 0 20px; }
@@ -80,3 +78,13 @@ select { font: inherit; padding: 8px 10px; border: 1px solid var(--border); bord
 .owner-row { display: flex; gap: 8px; max-width: 520px; }
 .owners { display: grid; gap: 2px; padding-top: 6px; border-top: 1px dashed var(--border); }
 .card .owner:first-of-type:is(.section-head + *) { margin-top: 0; padding-top: 0; border-top: 0; margin-bottom: 16px; }
+
+.logo-badge { display: inline-flex; align-items: center; background: #ffffff; border-radius: 10px; padding: 4px 10px; }
+.logo-badge img { display: block; height: 34px; width: auto; }
+.logo-badge.big { padding: 10px 18px; border-radius: 14px; margin: 0 auto 4px; }
+.logo-badge.big img { height: 64px; }
+.brand-title { font-weight: 700; }
+input:focus, textarea:focus, select:focus { outline: 2px solid var(--brand); outline-offset: 0; border-color: transparent; }
+.team:hover { border-color: var(--brand); }
+h2 { color: var(--text); }
+@media (max-width: 640px) { .brand-title { display: none; } }
