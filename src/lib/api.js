@@ -111,6 +111,22 @@ const real = {
     if (error) throw error
     await supabase.storage.from('arquivos').remove([f.path])
   },
+  async listHistory(teamId, limit = 200) {
+    let q = supabase.from('history').select('id, created_at, user_email, team_id, team_name, action')
+      .order('created_at', { ascending: false }).limit(limit)
+    if (teamId) q = q.eq('team_id', teamId)
+    const { data, error } = await q
+    if (error) throw error
+    return data
+  },
+  // Chama cb sempre que alguém altera algo no banco.
+  subscribe(cb) {
+    const channel = supabase.channel('mudancas')
+    for (const table of ['teams', 'members', 'songs', 'files', 'history'])
+      channel.on('postgres_changes', { event: '*', schema: 'public', table }, () => cb(table))
+    channel.subscribe()
+    return () => { supabase.removeChannel(channel) }
+  },
 }
 
 // ---------- Demonstração (localStorage) ----------
@@ -135,6 +151,17 @@ const save = (db) => {
   try { localStorage.setItem(DEMO_KEY, JSON.stringify(db)) } catch { /* ignora */ }
 }
 let listeners = []
+let changeListeners = []
+const notify = (table) => changeListeners.forEach((l) => l(table))
+// Outras abas do mesmo navegador também são avisadas.
+try { window.addEventListener('storage', (e) => { if (e.key === DEMO_KEY) notify('teams') }) } catch { /* ignora */ }
+const demoLog = (db, teamId, action) => {
+  db.history = db.history || []
+  db.history.unshift({ id: Date.now() + Math.random(), created_at: new Date().toISOString(),
+    user_email: db.user?.email || 'demo', team_id: teamId, team_name: teamId, action })
+}
+const roleLabel = (r) => ROLES.find((x) => x.id === r)?.label || r
+const colorLabel = (c) => c[0].toUpperCase() + c.slice(1)
 let demoSongs = []
 let demoFiles = []
 const demo = {
@@ -156,37 +183,59 @@ const demo = {
     const db = load()
     if (color && db.teams.some((t) => t.color === color && t.id !== teamId))
       throw new Error('Essa cor já foi escolhida por outra equipe.')
-    db.teams.find((t) => t.id === teamId).color = color
-    save(db)
+    const team = db.teams.find((t) => t.id === teamId)
+    const old = team.color
+    team.color = color
+    demoLog(db, teamId, !color ? `Removeu a cor ${colorLabel(old)}` : !old ? `Escolheu a cor ${colorLabel(color)}`
+      : `Trocou a cor de ${colorLabel(old)} para ${colorLabel(color)}`)
+    save(db); notify('teams')
   },
   async setMemberName(teamId, role, name) {
     const db = load()
-    db.teams.find((t) => t.id === teamId).members.find((m) => m.role === role).name = name
-    save(db)
+    const m = db.teams.find((t) => t.id === teamId).members.find((x) => x.role === role)
+    const old = m.name
+    if (old === name) return
+    m.name = name
+    demoLog(db, teamId, !name ? `${roleLabel(role)}: removeu "${old}"` : !old ? `${roleLabel(role)}: definiu "${name}"`
+      : `${roleLabel(role)}: trocou "${old}" por "${name}"`)
+    save(db); notify('members')
   },
   // No modo demonstração as músicas ficam só na memória (somem ao recarregar).
   async listSongs(teamId) { return demoSongs.filter((s) => s.team_id === teamId) },
   async addSong(teamId, file, title) {
     demoSongs.push({ id: crypto.randomUUID(), team_id: teamId, title, path: file.name,
       url: URL.createObjectURL(file), created_at: new Date().toISOString() })
+    const db = load(); demoLog(db, teamId, `Adicionou a música "${title}"`); save(db); notify('songs')
   },
   async removeSong(song) {
     URL.revokeObjectURL(song.url)
     demoSongs = demoSongs.filter((s) => s.id !== song.id)
+    const db = load(); demoLog(db, song.team_id, `Removeu a música "${song.title}"`); save(db); notify('songs')
   },
   async setNotes(teamId, notes) {
     const db = load()
     db.teams.find((t) => t.id === teamId).notes = notes
-    save(db)
+    demoLog(db, teamId, 'Editou as anotações')
+    save(db); notify('teams')
   },
   async listFiles(teamId) { return demoFiles.filter((f) => f.team_id === teamId) },
   async addFile(teamId, file) {
     demoFiles.unshift({ id: crypto.randomUUID(), team_id: teamId, name: file.name, path: file.name,
       size: file.size, mime: file.type, url: URL.createObjectURL(file), created_at: new Date().toISOString() })
+    const db = load(); demoLog(db, teamId, `Enviou o arquivo "${file.name}"`); save(db); notify('files')
   },
   async removeFile(f) {
     URL.revokeObjectURL(f.url)
     demoFiles = demoFiles.filter((x) => x.id !== f.id)
+    const db = load(); demoLog(db, f.team_id, `Removeu o arquivo "${f.name}"`); save(db); notify('files')
+  },
+  async listHistory(teamId, limit = 200) {
+    const h = load().history || []
+    return (teamId ? h.filter((x) => x.team_id === teamId) : h).slice(0, limit)
+  },
+  subscribe(cb) {
+    changeListeners.push(cb)
+    return () => { changeListeners = changeListeners.filter((l) => l !== cb) }
   },
 }
 

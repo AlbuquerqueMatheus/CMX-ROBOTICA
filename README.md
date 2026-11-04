@@ -14,7 +14,7 @@ Sem configuração, o site abre em **modo demonstração** (dados salvos só no 
 ## Conectar o banco de dados (Supabase)
 
 1. Crie um projeto gratuito em https://supabase.com.
-2. Em **SQL Editor**, cole e rode o conteúdo de `supabase/schema.sql`.
+2. Em **SQL Editor**, cole e rode o conteúdo de `supabase/schema.sql` e depois o de `supabase/002-tempo-real-e-historico.sql` (histórico de alterações e atualização em tempo real).
 3. Em **Authentication > Sign In / Providers**, desative "Allow new users to sign up".
 4. Em **Authentication > Users**, crie os usuários dos professores e do coordenador (e-mail e senha).
 5. Copie `.env.example` para `.env.local` e preencha com a URL e a chave `anon` (Project Settings > API).

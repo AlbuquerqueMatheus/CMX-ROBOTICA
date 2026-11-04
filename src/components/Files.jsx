@@ -5,16 +5,21 @@ const formatSize = (b) => (b < 1024 * 1024 ? `${Math.max(1, Math.round(b / 1024)
 const icon = (mime) =>
   mime.startsWith('image/') ? '🖼️' : mime === 'application/pdf' ? '📄' : mime.startsWith('video/') ? '🎬' : '📎'
 
-export default function Files({ teamId }) {
+export default function Files({ teamId, version }) {
   const [files, setFiles] = useState([])
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
   const input = useRef(null)
 
   const load = async () => {
-    try { setFiles(await api.listFiles(teamId)) } catch (e) { setError('Não foi possível carregar os arquivos. ' + (e.message || '')) }
+    try {
+      const fresh = await api.listFiles(teamId)
+      // Mantém o link antigo de quem já estava na lista, para não interromper o que está tocando.
+      setFiles((cur) => fresh.map((x) => ({ ...x, url: cur.find((c) => c.id === x.id)?.url || x.url })))
+    } catch (e) { setError('Não foi possível carregar os arquivos. ' + (e.message || '')) }
   }
   useEffect(() => { setFiles([]); load() }, [teamId])
+  useEffect(() => { if (version) load() }, [version])
 
   const upload = async (list) => {
     setError('')

@@ -1,17 +1,28 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '../lib/api'
 import { COLORS, ROLES } from '../lib/constants'
 import Songs from './Songs'
 import Files from './Files'
 import Notes from './Notes'
+import History from './History'
 
-export default function TeamDetail({ team, teams, onBack, onChange }) {
+export default function TeamDetail({ team, teams, version, onBack, onChange }) {
   const initial = () => Object.fromEntries(ROLES.map((r) => [r.id, team.members.find((m) => m.role === r.id)?.name || '']))
   const [names, setNames] = useState(initial)
   const [status, setStatus] = useState('')
   const [error, setError] = useState('')
 
-  useEffect(() => { setNames(initial()) }, [team.id])
+  const server = useRef(initial())
+
+  useEffect(() => { setNames(initial()); server.current = initial() }, [team.id])
+
+  // Quando outra pessoa altera um nome, atualiza o campo, exceto se você estiver editando ele.
+  useEffect(() => {
+    const fresh = initial()
+    setNames((cur) => Object.fromEntries(ROLES.map((r) =>
+      [r.id, cur[r.id] === server.current[r.id] ? fresh[r.id] : cur[r.id]])))
+    server.current = fresh
+  }, [team.members])
 
   const takenBy = (colorId) => teams.find((t) => t.color === colorId && t.id !== team.id)
 
@@ -87,11 +98,13 @@ export default function TeamDetail({ team, teams, onBack, onChange }) {
         </form>
       </section>
 
-      <Songs teamId={team.id} />
+      <Songs teamId={team.id} version={version} />
 
-      <Files teamId={team.id} />
+      <Files teamId={team.id} version={version} />
 
       <Notes team={team} onChange={onChange} />
+
+      <History teamId={team.id} version={version} limit={10} compact />
     </div>
   )
 }

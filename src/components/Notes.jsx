@@ -1,10 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '../lib/api'
 
 export default function Notes({ team, onChange }) {
   const [text, setText] = useState(team.notes || '')
   const [status, setStatus] = useState('')
-  useEffect(() => { setText(team.notes || '') }, [team.id])
+  const server = useRef(team.notes || '')
+  useEffect(() => { setText(team.notes || ''); server.current = team.notes || '' }, [team.id])
+  // Se outra pessoa salvar e você não estiver editando, mostra o texto novo.
+  useEffect(() => {
+    const fresh = team.notes || ''
+    setText((cur) => (cur === server.current ? fresh : cur))
+    server.current = fresh
+  }, [team.notes])
 
   const dirty = text !== (team.notes || '')
 
