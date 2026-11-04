@@ -3,7 +3,7 @@ import { api } from '../lib/api'
 
 const titleFromFile = (name) => name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim()
 
-export default function Songs({ teamId }) {
+export default function Songs({ teamId, version }) {
   const [songs, setSongs] = useState([])
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
@@ -12,9 +12,14 @@ export default function Songs({ teamId }) {
   const players = useRef({})
 
   const load = async () => {
-    try { setSongs(await api.listSongs(teamId)) } catch (e) { setError('Não foi possível carregar as músicas. ' + (e.message || '')) }
+    try {
+      const fresh = await api.listSongs(teamId)
+      // Mantém o link antigo de quem já estava na lista, para não interromper o que está tocando.
+      setSongs((cur) => fresh.map((x) => ({ ...x, url: cur.find((c) => c.id === x.id)?.url || x.url })))
+    } catch (e) { setError('Não foi possível carregar as músicas. ' + (e.message || '')) }
   }
   useEffect(() => { setSongs([]); setPlaying(null); load() }, [teamId])
+  useEffect(() => { if (version) load() }, [version])
 
   const upload = async (files) => {
     setError('')

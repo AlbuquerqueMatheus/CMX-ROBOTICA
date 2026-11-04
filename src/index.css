@@ -67,3 +67,12 @@ textarea { resize: vertical; line-height: 1.5; }
 .file-name:hover { text-decoration: underline; }
 a.link { text-decoration: none; }
 @media (max-width: 640px) { .files li { grid-template-columns: 48px 1fr auto; } .files li a.link { display: none; } }
+.nav { display: flex; gap: 4px; }
+.nav button { background: none; border: 0; padding: 6px 12px; border-radius: 8px; color: var(--muted); font-weight: 600; }
+.nav button.on { background: var(--bg); color: var(--text); }
+select { font: inherit; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); }
+.history { list-style: none; margin: 0; padding: 0; display: grid; }
+.history.card { padding: 0 20px; }
+.history li { padding: 12px 0; border-bottom: 1px solid var(--border); display: grid; gap: 3px; }
+.history li:last-child { border-bottom: 0; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); margin-right: 4px; }
