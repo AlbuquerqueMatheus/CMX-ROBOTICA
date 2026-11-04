@@ -6,6 +6,7 @@ import Files from './Files'
 import Notes from './Notes'
 import History from './History'
 import OwnerField from './OwnerField'
+import ResetTeam from './ResetTeam'
 
 export default function TeamDetail({ team, teams, version, onBack, onChange }) {
   const initial = () => Object.fromEntries(ROLES.map((r) => [r.id, team.members.find((m) => m.role === r.id)?.name || '']))
@@ -110,6 +111,8 @@ export default function TeamDetail({ team, teams, version, onBack, onChange }) {
       <Notes team={team} onChange={onChange} />
 
       <History teamId={team.id} version={version} limit={10} compact />
+
+      <ResetTeam team={team} onChange={onChange} />
     </div>
   )
 }
