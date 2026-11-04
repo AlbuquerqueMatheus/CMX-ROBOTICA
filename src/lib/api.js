@@ -66,7 +66,11 @@ const real = {
   async addSong(teamId, file, title) {
     const ext = (file.name.split('.').pop() || 'mp3').toLowerCase().replace(/[^a-z0-9]/g, '')
     const path = `${teamId}/${crypto.randomUUID()}.${ext}`
-    const { error } = await supabase.storage.from('musicas').upload(path, file, { contentType: audioTypeOf(file) || 'audio/mpeg' })
+    // O Supabase usa o tipo do próprio arquivo (o Windows diz "video/mpeg" para .mpeg),
+    // então reembalamos o conteúdo com o tipo de áudio certo antes de enviar.
+    const type = audioTypeOf(file) || 'audio/mpeg'
+    const body = new Blob([file], { type })
+    const { error } = await supabase.storage.from('musicas').upload(path, body, { contentType: type })
     if (error) throw new Error('Falha ao enviar o arquivo. ' + error.message)
     const { error: e2 } = await supabase.from('songs').insert({ team_id: teamId, title, path })
     if (e2) {
