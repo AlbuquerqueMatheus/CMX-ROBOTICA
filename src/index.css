@@ -15,7 +15,7 @@
 body { margin: 0; background: var(--bg); }
 button { font: inherit; cursor: pointer; color: inherit; }
 button:disabled { cursor: not-allowed; opacity: .45; }
-input { font: inherit; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); width: 100%; }
+input, textarea { font: inherit; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); width: 100%; }
 label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 14px; }
 h1, h2, h3 { margin: 0 0 12px; }
 .muted { color: var(--muted); font-weight: normal; }
@@ -57,3 +57,13 @@ h1, h2, h3 { margin: 0 0 12px; }
 .song-title { font-weight: 600; overflow-wrap: anywhere; }
 .danger { color: var(--error); }
 @media (max-width: 640px) { .songs li { grid-template-columns: 1fr auto; } .songs audio { grid-column: 1 / -1; grid-row: 2; } }
+textarea { resize: vertical; line-height: 1.5; }
+.files { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.files li { display: grid; grid-template-columns: 48px 1fr auto auto; align-items: center; gap: 12px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; }
+.thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; background: var(--bg); }
+.thumb.icon { display: grid; place-items: center; font-size: 24px; }
+.file-info { display: flex; flex-direction: column; min-width: 0; }
+.file-name { font-weight: 600; color: var(--text); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-name:hover { text-decoration: underline; }
+a.link { text-decoration: none; }
+@media (max-width: 640px) { .files li { grid-template-columns: 48px 1fr auto; } .files li a.link { display: none; } }

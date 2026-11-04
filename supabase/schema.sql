@@ -75,3 +75,35 @@ create policy "logados enviam musicas" on storage.objects
 drop policy if exists "logados apagam musicas" on storage.objects;
 create policy "logados apagam musicas" on storage.objects
   for delete to authenticated using (bucket_id = 'musicas');
+
+-- ============ Passo 3: arquivos e anotações ============
+alter table public.teams add column if not exists notes text not null default '';
+
+create table if not exists public.files (
+  id uuid primary key default gen_random_uuid(),
+  team_id uuid not null references public.teams(id) on delete cascade,
+  name text not null,
+  path text not null unique,
+  size bigint not null default 0,
+  mime text not null default '',
+  created_at timestamptz not null default now()
+);
+alter table public.files enable row level security;
+drop policy if exists "logados gerenciam arquivos" on public.files;
+create policy "logados gerenciam arquivos" on public.files
+  for all to authenticated using (true) with check (true);
+
+-- Bucket privado para PDFs, fotos e outros arquivos (até 50 MB cada).
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('arquivos', 'arquivos', false, 52428800)
+on conflict (id) do nothing;
+
+drop policy if exists "logados leem arquivos" on storage.objects;
+create policy "logados leem arquivos" on storage.objects
+  for select to authenticated using (bucket_id = 'arquivos');
+drop policy if exists "logados enviam arquivos" on storage.objects;
+create policy "logados enviam arquivos" on storage.objects
+  for insert to authenticated with check (bucket_id = 'arquivos');
+drop policy if exists "logados apagam arquivos" on storage.objects;
+create policy "logados apagam arquivos" on storage.objects
+  for delete to authenticated using (bucket_id = 'arquivos');

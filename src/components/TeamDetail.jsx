@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { COLORS, ROLES } from '../lib/constants'
 import Songs from './Songs'
+import Files from './Files'
+import Notes from './Notes'
 
 export default function TeamDetail({ team, teams, onBack, onChange }) {
   const initial = () => Object.fromEntries(ROLES.map((r) => [r.id, team.members.find((m) => m.role === r.id)?.name || '']))
@@ -86,6 +88,10 @@ export default function TeamDetail({ team, teams, onBack, onChange }) {
       </section>
 
       <Songs teamId={team.id} />
+
+      <Files teamId={team.id} />
+
+      <Notes team={team} onChange={onChange} />
     </div>
   )
 }

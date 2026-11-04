@@ -32,7 +32,7 @@ const real = {
   async listTeams() {
     const { data, error } = await supabase
       .from('teams')
-      .select('id, name, color, members(id, role, name)')
+      .select('id, name, color, notes, members(id, role, name)')
     if (error) throw error
     return sortTeams(data)
   },
@@ -79,6 +79,38 @@ const real = {
     if (error) throw error
     await supabase.storage.from('musicas').remove([song.path])
   },
+  async setNotes(teamId, notes) {
+    const { error } = await supabase.from('teams').update({ notes }).eq('id', teamId)
+    if (error) throw error
+  },
+  async listFiles(teamId) {
+    const { data, error } = await supabase
+      .from('files').select('id, name, path, size, mime, created_at')
+      .eq('team_id', teamId).order('created_at', { ascending: false })
+    if (error) throw error
+    if (!data.length) return []
+    const { data: signed, error: e2 } = await supabase.storage
+      .from('arquivos').createSignedUrls(data.map((f) => f.path), 60 * 60)
+    if (e2) throw e2
+    return data.map((f, i) => ({ ...f, url: signed[i]?.signedUrl }))
+  },
+  async addFile(teamId, file) {
+    const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '')
+    const path = `${teamId}/${crypto.randomUUID()}.${ext}`
+    const { error } = await supabase.storage.from('arquivos').upload(path, file, { contentType: file.type })
+    if (error) throw new Error('Falha ao enviar o arquivo. ' + error.message)
+    const { error: e2 } = await supabase.from('files')
+      .insert({ team_id: teamId, name: file.name, path, size: file.size, mime: file.type })
+    if (e2) {
+      await supabase.storage.from('arquivos').remove([path])
+      throw e2
+    }
+  },
+  async removeFile(f) {
+    const { error } = await supabase.from('files').delete().eq('id', f.id)
+    if (error) throw error
+    await supabase.storage.from('arquivos').remove([f.path])
+  },
 }
 
 // ---------- Demonstração (localStorage) ----------
@@ -94,6 +126,7 @@ const load = () => {
       id: name,
       name,
       color: null,
+      notes: '',
       members: ROLES.map((r) => ({ id: `${name}-${r.id}`, role: r.id, name: '' })),
     })),
   }
@@ -103,6 +136,7 @@ const save = (db) => {
 }
 let listeners = []
 let demoSongs = []
+let demoFiles = []
 const demo = {
   async getUser() { return load().user },
   onAuthChange(cb) {
@@ -139,6 +173,20 @@ const demo = {
   async removeSong(song) {
     URL.revokeObjectURL(song.url)
     demoSongs = demoSongs.filter((s) => s.id !== song.id)
+  },
+  async setNotes(teamId, notes) {
+    const db = load()
+    db.teams.find((t) => t.id === teamId).notes = notes
+    save(db)
+  },
+  async listFiles(teamId) { return demoFiles.filter((f) => f.team_id === teamId) },
+  async addFile(teamId, file) {
+    demoFiles.unshift({ id: crypto.randomUUID(), team_id: teamId, name: file.name, path: file.name,
+      size: file.size, mime: file.type, url: URL.createObjectURL(file), created_at: new Date().toISOString() })
+  },
+  async removeFile(f) {
+    URL.revokeObjectURL(f.url)
+    demoFiles = demoFiles.filter((x) => x.id !== f.id)
   },
 }
 
