@@ -24,3 +24,18 @@ export const OWNER_FIELDS = {
   flag_owner: 'Responsável pela bandeira',
   music_owner: 'Responsável pela música',
 }
+
+// Extensões de áudio aceitas e o tipo usado ao salvar. O Windows marca .mpeg/.mpg como
+// "video/mpeg" (ou deixa sem tipo), então decidimos pelo nome do arquivo.
+export const AUDIO_TYPES = {
+  mp3: 'audio/mpeg', mpeg: 'audio/mpeg', mpg: 'audio/mpeg', mpga: 'audio/mpeg',
+  m4a: 'audio/mp4', aac: 'audio/aac', wav: 'audio/wav', ogg: 'audio/ogg',
+  oga: 'audio/ogg', opus: 'audio/ogg', flac: 'audio/flac', webm: 'audio/webm',
+}
+export const AUDIO_ACCEPT = 'audio/*,' + Object.keys(AUDIO_TYPES).map((e) => '.' + e).join(',')
+export const audioTypeOf = (file) => {
+  const ext = (file.name.split('.').pop() || '').toLowerCase()
+  if (AUDIO_TYPES[ext]) return AUDIO_TYPES[ext]
+  if (file.type.startsWith('audio/')) return file.type
+  return null
+}

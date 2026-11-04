@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../lib/api'
+import { AUDIO_ACCEPT, audioTypeOf } from '../lib/constants'
 
 const titleFromFile = (name) => name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim()
 
@@ -24,7 +25,7 @@ export default function Songs({ teamId, version, children }) {
   const upload = async (files) => {
     setError('')
     for (const file of files) {
-      if (!file.type.startsWith('audio/')) { setError(`"${file.name}" não é um arquivo de áudio.`); continue }
+      if (!audioTypeOf(file)) { setError(`"${file.name}" não é um arquivo de áudio aceito (MP3, MPEG, M4A, WAV, OGG…).`); continue }
       if (file.size > 50 * 1024 * 1024) { setError(`"${file.name}" passa de 50 MB.`); continue }
       setBusy(`Enviando "${file.name}"…`)
       try { await api.addSong(teamId, file, titleFromFile(file.name)) } catch (e) { setError(e.message) }
@@ -52,13 +53,13 @@ export default function Songs({ teamId, version, children }) {
         <button type="button" className="primary" disabled={!!busy} onClick={() => input.current?.click()}>
           + Adicionar música
         </button>
-        <input ref={input} type="file" accept="audio/*" multiple hidden onChange={(e) => upload([...e.target.files])} />
+        <input ref={input} type="file" accept={AUDIO_ACCEPT} multiple hidden onChange={(e) => upload([...e.target.files])} />
       </div>
       {children}
       {error && <div className="error">{error}</div>}
       {busy && <p className="muted">{busy}</p>}
       {songs.length === 0 && !busy ? (
-        <p className="muted">Nenhuma música ainda. Envie arquivos MP3 (até 50 MB cada).</p>
+        <p className="muted">Nenhuma música ainda. Envie arquivos MP3 ou MPEG (até 50 MB cada).</p>
       ) : (
         <ul className="songs">
           {songs.map((s) => (
