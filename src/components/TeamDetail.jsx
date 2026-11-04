@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { COLORS, ROLES } from '../lib/constants'
+import Songs from './Songs'
 
 export default function TeamDetail({ team, teams, onBack, onChange }) {
   const initial = () => Object.fromEntries(ROLES.map((r) => [r.id, team.members.find((m) => m.role === r.id)?.name || '']))
@@ -83,6 +84,8 @@ export default function TeamDetail({ team, teams, onBack, onChange }) {
           </div>
         </form>
       </section>
+
+      <Songs teamId={team.id} />
     </div>
   )
 }

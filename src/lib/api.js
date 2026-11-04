@@ -52,6 +52,33 @@ const real = {
       )
     if (error) throw error
   },
+  async listSongs(teamId) {
+    const { data, error } = await supabase
+      .from('songs').select('id, title, path, created_at')
+      .eq('team_id', teamId).order('created_at')
+    if (error) throw error
+    if (!data.length) return []
+    const { data: signed, error: e2 } = await supabase.storage
+      .from('musicas').createSignedUrls(data.map((s) => s.path), 60 * 60)
+    if (e2) throw e2
+    return data.map((s, i) => ({ ...s, url: signed[i]?.signedUrl }))
+  },
+  async addSong(teamId, file, title) {
+    const ext = (file.name.split('.').pop() || 'mp3').toLowerCase().replace(/[^a-z0-9]/g, '')
+    const path = `${teamId}/${crypto.randomUUID()}.${ext}`
+    const { error } = await supabase.storage.from('musicas').upload(path, file, { contentType: file.type })
+    if (error) throw new Error('Falha ao enviar o arquivo. ' + error.message)
+    const { error: e2 } = await supabase.from('songs').insert({ team_id: teamId, title, path })
+    if (e2) {
+      await supabase.storage.from('musicas').remove([path])
+      throw e2
+    }
+  },
+  async removeSong(song) {
+    const { error } = await supabase.from('songs').delete().eq('id', song.id)
+    if (error) throw error
+    await supabase.storage.from('musicas').remove([song.path])
+  },
 }
 
 // ---------- Demonstração (localStorage) ----------
@@ -75,6 +102,7 @@ const save = (db) => {
   try { localStorage.setItem(DEMO_KEY, JSON.stringify(db)) } catch { /* ignora */ }
 }
 let listeners = []
+let demoSongs = []
 const demo = {
   async getUser() { return load().user },
   onAuthChange(cb) {
@@ -101,6 +129,16 @@ const demo = {
     const db = load()
     db.teams.find((t) => t.id === teamId).members.find((m) => m.role === role).name = name
     save(db)
+  },
+  // No modo demonstração as músicas ficam só na memória (somem ao recarregar).
+  async listSongs(teamId) { return demoSongs.filter((s) => s.team_id === teamId) },
+  async addSong(teamId, file, title) {
+    demoSongs.push({ id: crypto.randomUUID(), team_id: teamId, title, path: file.name,
+      url: URL.createObjectURL(file), created_at: new Date().toISOString() })
+  },
+  async removeSong(song) {
+    URL.revokeObjectURL(song.url)
+    demoSongs = demoSongs.filter((s) => s.id !== song.id)
   },
 }
 
