@@ -1,7 +1,7 @@
 // Camada de dados. Usa o Supabase quando as variáveis de ambiente existem;
 // sem elas, roda em "modo demonstração" salvando só neste navegador.
 import { createClient } from '@supabase/supabase-js'
-import { OWNER_FIELDS, ROLES, TEAM_NAMES } from './constants'
+import { OWNER_FIELDS, ROLES, TEAM_NAMES, audioTypeOf } from './constants'
 
 const url = import.meta.env.VITE_SUPABASE_URL
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -66,7 +66,7 @@ const real = {
   async addSong(teamId, file, title) {
     const ext = (file.name.split('.').pop() || 'mp3').toLowerCase().replace(/[^a-z0-9]/g, '')
     const path = `${teamId}/${crypto.randomUUID()}.${ext}`
-    const { error } = await supabase.storage.from('musicas').upload(path, file, { contentType: file.type })
+    const { error } = await supabase.storage.from('musicas').upload(path, file, { contentType: audioTypeOf(file) || 'audio/mpeg' })
     if (error) throw new Error('Falha ao enviar o arquivo. ' + error.message)
     const { error: e2 } = await supabase.from('songs').insert({ team_id: teamId, title, path })
     if (e2) {
@@ -210,7 +210,7 @@ const demo = {
   async listSongs(teamId) { return demoSongs.filter((s) => s.team_id === teamId) },
   async addSong(teamId, file, title) {
     demoSongs.push({ id: crypto.randomUUID(), team_id: teamId, title, path: file.name,
-      url: URL.createObjectURL(file), created_at: new Date().toISOString() })
+      url: URL.createObjectURL(new Blob([file], { type: audioTypeOf(file) || 'audio/mpeg' })), created_at: new Date().toISOString() })
     const db = load(); demoLog(db, teamId, `Adicionou a música "${title}"`); save(db); notify('songs')
   },
   async removeSong(song) {
