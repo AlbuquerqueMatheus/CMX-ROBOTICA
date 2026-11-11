@@ -39,3 +39,8 @@ export const audioTypeOf = (file) => {
   if (file.type.startsWith('audio/')) return file.type
   return null
 }
+
+// Quem vai dançar a música. Se o banco ainda não tem a lista (SQL 005 não rodado),
+// usa o antigo "responsável pela música".
+export const dancersOf = (team) =>
+  Array.isArray(team?.music_dancers) ? team.music_dancers : team?.music_owner ? [team.music_owner] : []
