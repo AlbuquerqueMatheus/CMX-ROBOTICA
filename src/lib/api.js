@@ -1,7 +1,7 @@
 // Camada de dados. Usa o Supabase quando as variáveis de ambiente existem;
 // sem elas, roda em "modo demonstração" salvando só neste navegador.
 import { createClient } from '@supabase/supabase-js'
-import { OWNER_FIELDS, ROLES, TEAM_NAMES, audioTypeOf } from './constants'
+import { OWNER_FIELDS, ROLES, TEAM_NAMES, audioTypeOf, dancersOf } from './constants'
 
 const url = import.meta.env.VITE_SUPABASE_URL
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -32,7 +32,7 @@ const real = {
   async listTeams() {
     const { data, error } = await supabase
       .from('teams')
-      .select('id, name, color, notes, flag_owner, music_owner, members(id, role, name)')
+      .select('*, members(id, role, name)')
     if (error) throw error
     return sortTeams(data)
   },
@@ -101,6 +101,14 @@ const real = {
   async setNotes(teamId, notes) {
     const { error } = await supabase.from('teams').update({ notes }).eq('id', teamId)
     if (error) throw error
+  },
+  // Lista de quem vai dançar a música da equipe.
+  async setDancers(teamId, names) {
+    const { error } = await supabase.from('teams').update({ music_dancers: names }).eq('id', teamId)
+    if (error) {
+      if (/music_dancers/.test(error.message || '')) throw new Error('Falta rodar o arquivo supabase/005-dancarinos.sql no Supabase.')
+      throw error
+    }
   },
   async listFiles(teamId) {
     const { data, error } = await supabase
@@ -234,7 +242,7 @@ const demo = {
   async resetTeam(teamId) {
     const db = load()
     const team = db.teams.find((t) => t.id === teamId)
-    Object.assign(team, { color: null, notes: '', flag_owner: '', music_owner: '' })
+    Object.assign(team, { color: null, notes: '', flag_owner: '', music_owner: '', music_dancers: [] })
     team.members.forEach((m) => { m.name = '' })
     const nSongs = demoSongs.filter((x) => x.team_id === teamId).length
     const nFiles = demoFiles.filter((x) => x.team_id === teamId).length
@@ -253,6 +261,18 @@ const demo = {
     const label = OWNER_FIELDS[field]
     demoLog(db, teamId, !value ? `${label}: removeu "${old}"` : !old ? `${label}: definiu "${value}"`
       : `${label}: trocou "${old}" por "${value}"`)
+    save(db); notify('teams')
+  },
+  async setDancers(teamId, names) {
+    const db = load()
+    const team = db.teams.find((t) => t.id === teamId)
+    const old = dancersOf(team)
+    const q = (l) => l.map((n) => `"${n}"`).join(', ')
+    const added = names.filter((n) => !old.includes(n))
+    const removed = old.filter((n) => !names.includes(n))
+    team.music_dancers = names
+    if (added.length) demoLog(db, teamId, `Dançarinos da música: adicionou ${q(added)}`)
+    if (removed.length) demoLog(db, teamId, `Dançarinos da música: removeu ${q(removed)}`)
     save(db); notify('teams')
   },
   async setNotes(teamId, notes) {

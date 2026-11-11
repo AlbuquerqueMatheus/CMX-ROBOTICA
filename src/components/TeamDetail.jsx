@@ -6,6 +6,7 @@ import Files from './Files'
 import Notes from './Notes'
 import History from './History'
 import OwnerField from './OwnerField'
+import Dancers from './Dancers'
 import ResetTeam from './ResetTeam'
 
 export default function TeamDetail({ team, teams, version, onBack, onChange }) {
@@ -103,7 +104,7 @@ export default function TeamDetail({ team, teams, version, onBack, onChange }) {
       </section>
 
       <Songs teamId={team.id} version={version}>
-        <OwnerField team={team} field="music_owner" onChange={onChange} />
+        <Dancers team={team} onChange={onChange} />
       </Songs>
 
       <Files teamId={team.id} version={version} />
