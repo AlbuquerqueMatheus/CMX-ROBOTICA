@@ -54,14 +54,24 @@ const real = {
   },
   async listSongs(teamId) {
     const { data, error } = await supabase
-      .from('songs').select('id, title, path, created_at')
+      .from('songs').select('*')
       .eq('team_id', teamId).order('created_at')
     if (error) throw error
-    if (!data.length) return []
+    const withFile = data.filter((s) => s.path)
+    if (!withFile.length) return data
     const { data: signed, error: e2 } = await supabase.storage
-      .from('musicas').createSignedUrls(data.map((s) => s.path), 60 * 60)
+      .from('musicas').createSignedUrls(withFile.map((s) => s.path), 60 * 60)
     if (e2) throw e2
-    return data.map((s, i) => ({ ...s, url: signed[i]?.signedUrl }))
+    const urls = Object.fromEntries(withFile.map((s, i) => [s.id, signed[i]?.signedUrl]))
+    return data.map((s) => (s.path ? { ...s, url: urls[s.id] } : s))
+  },
+  // Música por link (ex.: gerada por IA, sem arquivo para baixar).
+  async addSongLink(teamId, title, link) {
+    const { error } = await supabase.from('songs').insert({ team_id: teamId, title, link })
+    if (error) {
+      if (/link|path/.test(error.message || '')) throw new Error('Falta rodar o arquivo supabase/006-links-de-musica.sql no Supabase.')
+      throw error
+    }
   },
   async addSong(teamId, file, title) {
     const ext = (file.name.split('.').pop() || 'mp3').toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -81,14 +91,14 @@ const real = {
   async removeSong(song) {
     const { error } = await supabase.from('songs').delete().eq('id', song.id)
     if (error) throw error
-    await supabase.storage.from('musicas').remove([song.path])
+    if (song.path) await supabase.storage.from('musicas').remove([song.path])
   },
   // Zera a equipe inteira. O banco apaga os registros e devolve os arquivos para remover do armazenamento.
   async resetTeam(teamId) {
     const { data, error } = await supabase.rpc('reset_team', { p_team_id: teamId })
     if (error) throw new Error('Não foi possível restaurar a equipe. ' + error.message)
     for (const bucket of ['musicas', 'arquivos']) {
-      const paths = (data || []).filter((r) => r.bucket === bucket).map((r) => r.path)
+      const paths = (data || []).filter((r) => r.bucket === bucket && r.path).map((r) => r.path)
       if (paths.length) await supabase.storage.from(bucket).remove(paths)
     }
   },
@@ -234,10 +244,14 @@ const demo = {
       url: URL.createObjectURL(new Blob([file], { type: audioTypeOf(file) || 'audio/mpeg' })), created_at: new Date().toISOString() })
     const db = load(); demoLog(db, teamId, `Adicionou a música "${title}"`); save(db); notify('songs')
   },
+  async addSongLink(teamId, title, link) {
+    demoSongs.push({ id: crypto.randomUUID(), team_id: teamId, title, path: null, link, created_at: new Date().toISOString() })
+    const db = load(); demoLog(db, teamId, `Adicionou o link da música "${title}"`); save(db); notify('songs')
+  },
   async removeSong(song) {
-    URL.revokeObjectURL(song.url)
+    if (song.path) URL.revokeObjectURL(song.url)
     demoSongs = demoSongs.filter((s) => s.id !== song.id)
-    const db = load(); demoLog(db, song.team_id, `Removeu a música "${song.title}"`); save(db); notify('songs')
+    const db = load(); demoLog(db, song.team_id, song.path ? `Removeu a música "${song.title}"` : `Removeu o link da música "${song.title}"`); save(db); notify('songs')
   },
   async resetTeam(teamId) {
     const db = load()
