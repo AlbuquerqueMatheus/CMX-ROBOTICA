@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../lib/api'
 import { OWNER_FIELDS } from '../lib/constants'
+import TeamIcon from './TeamIcon'
 
 // Campo "Responsável por…" com botão de salvar. Atualiza sozinho se outra pessoa mudar
 // e você não estiver editando.
-export default function OwnerField({ team, field, hint, onChange }) {
+export default function OwnerField({ team, field, hint, icon, onChange }) {
   const value = team[field] || ''
   const [text, setText] = useState(value)
   const [status, setStatus] = useState('')
@@ -34,7 +35,7 @@ export default function OwnerField({ team, field, hint, onChange }) {
   return (
     <form className="owner" onSubmit={save}>
       <label>
-        {OWNER_FIELDS[field]}
+        <span className="with-icon">{icon && <TeamIcon kind={icon} color={team.color} size={40} />}{OWNER_FIELDS[field]}</span>
         {hint && <span className="small muted">{hint}</span>}
         <div className="owner-row">
           <input value={text} placeholder="Nome do responsável" onChange={(e) => setText(e.target.value)} />
