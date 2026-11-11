@@ -117,3 +117,11 @@ h2 { color: var(--text); }
 .owner-line .muted { flex: none; }
 .song-title { display: flex; align-items: center; gap: 8px; }
 label.with-icon, .owner label .with-icon { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 10px; text-align: left; }
+.secondary { background: transparent; color: var(--text); border: 1px solid var(--accent); border-radius: 8px; padding: 10px 16px; font-weight: 600; }
+.secondary:not(:disabled):hover { background: var(--accent-soft); border-color: var(--accent-hover); }
+.section-head .row { grid-column: auto; flex-wrap: wrap; gap: 8px; }
+.link-form { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin: 0 0 16px; padding: 14px; border: 1px dashed var(--accent); border-radius: 10px; }
+.song-link { justify-self: start; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--border); color: var(--brand-light); font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+.song-link:hover { border-color: var(--brand); }
+@media (max-width: 640px) { .link-form { grid-template-columns: 1fr; } .songs .song-link { grid-column: 1 / -1; grid-row: 2; } }
