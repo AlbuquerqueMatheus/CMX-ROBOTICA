@@ -1,5 +1,6 @@
 import { colorById, dancersOf, ROLES } from '../lib/constants'
 import ColorDot from './ColorDot'
+import TeamIcon from './TeamIcon'
 
 export default function TeamGrid({ teams, onOpen }) {
   return (
@@ -28,8 +29,8 @@ export default function TeamGrid({ teams, onOpen }) {
                 })}
               </ul>
               <div className="owners small">
-                <div><span className="muted">🚩 Bandeira:</span> {t.flag_owner || <em className="muted">a definir</em>}</div>
-                <div><span className="muted">💃 Dançarinos:</span> {dancersOf(t).join(', ') || <em className="muted">a definir</em>}</div>
+                <div className="owner-line"><TeamIcon kind="bandeira" color={t.color} size={32} /><span className="muted">Bandeira:</span> {t.flag_owner || <em className="muted">a definir</em>}</div>
+                <div className="owner-line"><TeamIcon kind="danca" color={t.color} size={32} /><span className="muted">Dançarinos:</span> {dancersOf(t).join(', ') || <em className="muted">a definir</em>}</div>
               </div>
               <div className="small muted">{filled}/4 integrantes</div>
             </button>

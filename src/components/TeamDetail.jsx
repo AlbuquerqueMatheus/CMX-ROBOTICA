@@ -82,7 +82,7 @@ export default function TeamDetail({ team, teams, version, onBack, onChange }) {
           })}
         </div>
         <p className="small muted">Cada cor pode ser usada por uma equipe. Clique na cor escolhida de novo para liberar.</p>
-        <OwnerField team={team} field="flag_owner" onChange={onChange}
+        <OwnerField team={team} field="flag_owner" icon="bandeira" onChange={onChange}
           hint={colorById(team.color) ? `Bandeira ${colorById(team.color).label.toLowerCase()}` : 'Escolha a cor da equipe para definir a bandeira'} />
       </section>
 
@@ -103,7 +103,7 @@ export default function TeamDetail({ team, teams, version, onBack, onChange }) {
         </form>
       </section>
 
-      <Songs teamId={team.id} version={version}>
+      <Songs teamId={team.id} color={team.color} version={version}>
         <Dancers team={team} onChange={onChange} />
       </Songs>
 

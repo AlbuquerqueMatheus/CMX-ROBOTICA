@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 import { dancersOf } from '../lib/constants'
+import TeamIcon from './TeamIcon'
 
 // Lista de quem vai dançar a música. Cada nome adicionado ou removido é salvo na hora,
 // e a lista se atualiza sozinha quando outra pessoa mexe.
@@ -44,8 +45,8 @@ export default function Dancers({ team, onChange }) {
 
   return (
     <form className="owner dancers" onSubmit={add}>
-      <label htmlFor={`dancers-${team.id}`}>
-        Dançarinos da música{list.length > 0 && ` (${list.length})`}
+      <label className="with-icon" htmlFor={`dancers-${team.id}`}>
+        <TeamIcon kind="danca" color={team.color} size={40} />Dançarinos da música{list.length > 0 && ` (${list.length})`}
       </label>
       {list.length === 0 ? (
         <p className="small muted">Ninguém ainda. Adicione os nomes de quem vai dançar.</p>

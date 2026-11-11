@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../lib/api'
 import { AUDIO_ACCEPT, audioTypeOf } from '../lib/constants'
+import TeamIcon from './TeamIcon'
 
 const titleFromFile = (name) => name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim()
 
-export default function Songs({ teamId, version, children }) {
+export default function Songs({ teamId, color, version, children }) {
   const [songs, setSongs] = useState([])
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
@@ -49,7 +50,7 @@ export default function Songs({ teamId, version, children }) {
   return (
     <section className="card">
       <div className="section-head">
-        <h3>Músicas</h3>
+        <h3 className="with-icon"><TeamIcon kind="musica" color={color} size={40} />Músicas</h3>
         <button type="button" className="primary" disabled={!!busy} onClick={() => input.current?.click()}>
           + Adicionar música
         </button>
@@ -64,7 +65,7 @@ export default function Songs({ teamId, version, children }) {
         <ul className="songs">
           {songs.map((s) => (
             <li key={s.id} className={playing === s.id ? 'now' : ''}>
-              <div className="song-title">🎵 {s.title}</div>
+              <div className="song-title"><TeamIcon kind="musica" color={color} size={28} />{s.title}</div>
               <audio controls preload="none" src={s.url}
                 ref={(el) => { players.current[s.id] = el }}
                 onPlay={() => onPlay(s.id)} onPause={() => setPlaying((p) => (p === s.id ? null : p))} />

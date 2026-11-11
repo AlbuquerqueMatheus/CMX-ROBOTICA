@@ -110,3 +110,10 @@ h2 { color: var(--text); }
   background: var(--bg); border: 1px solid var(--border); }
 .chip-x { background: none; border: 0; color: var(--muted); cursor: pointer; padding: 2px 6px; border-radius: 999px; font-size: 0.8em; line-height: 1; }
 .chip-x:hover:not(:disabled) { color: var(--text); background: var(--border); }
+.team-icon { flex: none; object-fit: contain; vertical-align: middle; user-select: none; }
+.team-icon.none { filter: grayscale(1); opacity: 0.45; }
+.with-icon { display: inline-flex; align-items: center; gap: 10px; }
+.owner-line { display: flex; align-items: center; gap: 6px; }
+.owner-line .muted { flex: none; }
+.song-title { display: flex; align-items: center; gap: 8px; }
+label.with-icon, .owner label .with-icon { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 10px; text-align: left; }
